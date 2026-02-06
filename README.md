@@ -10,8 +10,8 @@ LinkedIn post has a limit of 3,000 characters. Unfortunately, the post form does
 - The pop-up will change the color from blue to red when there are 100 characters before the limit. 
 
 ## How it looks
-![]()
+![](https://i.postimg.cc/G253MY8B/Screenshot-at-Feb-06-20-12-27.png)
 
-![]()
+![](https://i.postimg.cc/nVNBr9dN/Screenshot-at-Feb-06-20-12-40.png)
 
-![]()
+![](https://i.postimg.cc/g2HZgSYJ/Screenshot-at-Feb-06-20-13-01.png)
