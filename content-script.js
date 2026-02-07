@@ -1,6 +1,6 @@
 (() => {
   const popup = document.createElement('div');
-  
+
   Object.assign(popup.style, {
     position: 'fixed',
     bottom: '20px',
@@ -34,10 +34,10 @@
   popup.addEventListener('mousedown', (e) => {
     isDragging = true;
     popup.style.cursor = 'grabbing';
-    
+
     startX = e.clientX - currentX;
     startY = e.clientY - currentY;
-    
+
     e.stopPropagation();
     e.preventDefault();
   });
@@ -63,8 +63,8 @@
 
   const LIMIT = 3000;
   const WARNING_THRESHOLD = 2900;
-  const COLOR_NORMAL = '#0a66c2'; 
-  const COLOR_WARNING = '#d11124'; 
+  const COLOR_NORMAL = '#0a66c2';
+  const COLOR_WARNING = '#d11124';
 
   function findElementInShadow(root, selector) {
     if (!root) return null;
@@ -84,7 +84,7 @@
 
   const startTracking = () => {
     const currentEditor = findElementInShadow(document, '.ql-editor[role="textbox"]');
-    
+
     if (!currentEditor) {
       attached = false;
       popup.style.display = 'none';
@@ -95,21 +95,27 @@
 
     const handleUpdate = () => {
       setTimeout(() => {
+        
+        let text = currentEditor.innerText || "";
 
-        const lines = currentEditor.innerText.split(/\n/);
-        
-        let normalizedText = lines.join('\n').replace(/\n\n+/g, '\n').trimEnd();
-        
-        const charArray = [...normalizedText];
-        
-        const charCount = charArray.length;
-        
+        text = text.replace(/\u00A0/g, ' '); 
+        text = text.replace(/[ ]+\n/g, '\n');
+
+        text = text.replace(/\n\n+/g, '\n');
+
+        text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+        if (text.endsWith('\n')) {
+          text = text.slice(0, -1);
+        }
+
+        const charCount = [...text].length;
+
         popup.textContent = `Characters: ${charCount} / ${LIMIT}`;
-
         popup.style.display = charCount > 0 ? 'block' : 'none';
-        
         popup.style.background = charCount >= WARNING_THRESHOLD ? COLOR_WARNING : COLOR_NORMAL;
 
+        console.log("Normalized Count:", charCount);
       }, 10);
     };
 
@@ -118,5 +124,5 @@
     attached = true;
   };
 
-  setInterval(startTracking, 1000);  
+  setInterval(startTracking, 1000);
 })();
