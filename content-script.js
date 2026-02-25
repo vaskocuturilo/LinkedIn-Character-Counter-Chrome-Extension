@@ -59,6 +59,26 @@
     popup.addEventListener(type, (e) => e.stopPropagation());
   });
 
+  const style = document.createElement('style');
+
+  style.textContent = `
+@keyframes emergencyFlash {
+  0%, 100% {
+    background-color: rgba(4, 0, 6, 0.85);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+  50% {
+    background-color: rgba(255, 77, 77, 0.9);
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.6);
+  }
+}
+
+.popup-emergency {
+  animation: emergencyFlash 0.8s ease-in-out infinite;
+}
+`;
+  document.head.appendChild(style);
+
   document.body.appendChild(popup);
 
   const LIMIT = 3000;
@@ -67,6 +87,7 @@
   const COLOR_NORMAL = '#0072b1';
   const COLOR_MIDDLE_WARNING = '#bdbd0b';
   const COLOR_WARNING = '#d11124';
+
 
   function findElementInShadow(root, selector) {
     if (!root) return null;
@@ -128,44 +149,43 @@
     const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
 
     const handleUpdate = () => {
-      setTimeout(() => {
-        const text = getLinkedInText(currentEditor);
+      const text = getLinkedInText(currentEditor);
 
-        let charCount = 0;
-        const segments = [...segmenter.segment(text)];
+      let charCount = 0;
+      const segments = [...segmenter.segment(text)];
 
-        for (const { segment } of segments) {
-          const isEmoji = /\p{Extended_Pictographic}/u.test(segment);
-          charCount += isEmoji ? 3 : segment.length;
-        }
+      for (const { segment } of segments) {
+        const isEmoji = /\p{Extended_Pictographic}/u.test(segment);
+        charCount += isEmoji ? 3 : segment.length;
+      }
 
-        popup.textContent = `Characters: ${charCount} / ${LIMIT}`;
-        popup.style.display = charCount > 0 ? 'block' : 'none';
+      popup.textContent = `Characters: ${charCount} / ${LIMIT}`;
+      popup.style.display = charCount > 0 ? 'block' : 'none';
 
-        if (charCount >= WARNING_THRESHOLD) {
-          popup.style.background = COLOR_WARNING;
-        } else if (charCount >= WARNING_MIDDLE_THRESHOLD) {
-          popup.style.background = COLOR_MIDDLE_WARNING;
-        } else {
-          popup.style.background = COLOR_NORMAL;
-        }
-      }, 50);
+      popup.classList.remove('popup-emergency');
+
+      if (charCount >= WARNING_THRESHOLD) {
+        popup.style.background = COLOR_WARNING;
+      } else if (charCount >= WARNING_MIDDLE_THRESHOLD) {
+        popup.style.background = COLOR_MIDDLE_WARNING;
+      } else {
+        popup.style.background = COLOR_NORMAL;
+      }
+
+      if (charCount >= LIMIT) {
+        popup.classList.add('popup-emergency');
+      }
     };
 
-    [
-      'input',
-      'keyup',
-      'paste',
-      'drop',
-      'click',
-      'mouseup'
-    ].forEach(eventType => {
-      currentEditor.addEventListener(eventType, handleUpdate);
+    const observer = new MutationObserver(() => {
+      handleUpdate();
     });
 
-
-    handleUpdate();
-    attached = true;
+    observer.observe(currentEditor, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
   };
 
   setInterval(startTracking, 1000);
