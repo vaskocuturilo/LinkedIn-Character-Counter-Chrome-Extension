@@ -156,7 +156,7 @@
 
       for (const { segment } of segments) {
         const isEmoji = /\p{Extended_Pictographic}/u.test(segment);
-        charCount += isEmoji ? 3 : segment.length;
+        charCount += isEmoji ? 2 : segment.length;
       }
 
       popup.textContent = `Characters: ${charCount} / ${LIMIT}`;
